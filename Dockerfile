@@ -37,6 +37,6 @@ ENV PATH=/usr/local/bin:/usr/local/lib:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/
 ENV PWD2=/usr/lib/oracle/12.2/network/mesg
 ENV ORACLE_HOME=/usr/lib/oracle/12.2
 
-EXPOSE 3000
+EXPOSE 3050
 
-CMD [ "gunicorn", "--bind", "0.0.0.0:3000","-w","5", "asap_sql_dashboard:server" ]
+CMD [ "gunicorn", "--bind", "0.0.0.0:3050","-w","5", "asap_sql_dashboard:server" ]

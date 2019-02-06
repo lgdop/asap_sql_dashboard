@@ -5,8 +5,7 @@ ENV JAVA_VERSION=1.8.0
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.191.b12-1.el7_6.x86_64/jre
 
 WORKDIR /sql_difference
-ENV http_proxy=http://172.23.29.155:3128
-ENV https_proxy=http://172.23.29.155:3128
+
 RUN yum update -y && yum -y install epel-release \
                                  unzip \
                                  java-1.8.0-openjdk \

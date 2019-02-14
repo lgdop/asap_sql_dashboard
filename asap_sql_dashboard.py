@@ -74,7 +74,7 @@ app.layout = html.Div([
     html.Link(href='/static/layout_style.css', rel='stylesheet'),
     html.H1(children='ASAP SQL TABLE REVISION',id ='sql', style={'fontSize':32,'textAlign': 'center','color': '#008080','display': 'inline-block','padding-top':'20px'}),
     html.Img(
-        src='/img/logo-client-liberty-color.png',
+        src='/img/logo-client-liberty-color.jpg',
         style={
             'height' : '15%',
             'width' : '15%',

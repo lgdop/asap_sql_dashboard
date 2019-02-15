@@ -20,13 +20,13 @@ from pymongo import MongoClient
 import json
 
 load_dotenv(dotenv_path='/config/asap.env')
-con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
-db=con['libertyglobal-oss-asap']
-coll=db['Environment']
 
 asap_env_list=['DEV1', 'DEd1', 'DEj1', 'DEu1', 'DEp3', 'DEj4', 'DEu4', 'DEp4', 'NLj4', 'NLu4', 'NLo4', 'NLp4', 'PLj3', 'PLu3', 'PLo3', 'PLp3', 'HUj2', 'HUu2', 'HUo2', 'HUp2', 'CZj4', 'CZu4', 'CZo4', 'CZp4', 'SKj2', 'SKu2', 'SKo2', 'SKp2', 'ROj2', 'ROu2', 'ROp2', 'CHj3', 'CHu3', 'CHo3', 'CHp3', 'ATj1', 'ATu1', 'ATo1', 'ATp1', 'CZj3', 'CZu2', 'CZp2', 'CHj4', 'CHu4', 'CHo4', 'CHp4']
 
 def update_mongo(selected_environment):
+    con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
+    db=con['libertyglobal-oss-asap']
+    coll=db['Environment']
     table_names=coll.find_one({'_id':selected_environment[:2].upper()})
     db_details=coll.find_one({'_id':'DB'})
     env_db_details=db_details[selected_environment]
@@ -111,6 +111,8 @@ def load_new_layout(env):
 @app.callback(Output("display_content", "children"), [Input("environments-dropdown", "value")])
 def display_modified_table_names(selected_environment):
     update_mongo(selected_environment)
+    con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
+    db=con['libertyglobal-oss-asap']
     diff_coll=db['sql_diff']
     get_table_names=diff_coll.find_one({'_id':selected_environment})
     tables=get_table_names['table_names']
@@ -136,6 +138,8 @@ def display_modified_table_names(selected_environment):
     [Input('table', 'selected_rows'),Input('table','data')],
     [State("environments-dropdown", "value")])
 def display_table_difference(selected_row_indices,rows,selected_environment):
+    con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
+    db=con['libertyglobal-oss-asap']
     print rows[selected_row_indices[0]].values()[0]
     diff_coll=db['sql_diff']
     processed_data=diff_coll.find_one({'_id':selected_environment})

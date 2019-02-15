@@ -99,13 +99,14 @@ app.layout = html.Div([
     html.Br()
     ])
 table_layout=html.Div([
-                html.Div(id="display_content",style={'display':'inline-block','float':'left'}),
+                html.Div(id="display_content",style={'display':'inline-block','float':'left'},children=[html.Div("Please wait while the page is loading...",style={'padding-left':'550px','color':'#CD7F32','textAlign':'center','fontSize':20})]),
                 html.Div(id="selected_content_display",style={'display':'inline-block','float':'right','padding-right':'350px'}),
             ])
 
 @app.callback(Output("new_layout", "children"), [Input("environments-dropdown", "value")])
 def load_new_layout(env):
-    return table_layout
+    if env is not None:
+        return table_layout
 
 @app.callback(Output("display_content", "children"), [Input("environments-dropdown", "value")])
 def display_modified_table_names(selected_environment):

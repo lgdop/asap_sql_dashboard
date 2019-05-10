@@ -21,7 +21,7 @@ import json
 
 load_dotenv(dotenv_path='/config/asap.env')
 
-asap_env_list=['DEV1', 'DEd1', 'DEj1', 'DEu1', 'DEp3', 'DEj4', 'DEu4', 'DEp4', 'NLj4', 'NLu4', 'NLo4', 'NLp4', 'PLj3', 'PLu3', 'PLo3', 'PLp3', 'HUj2', 'HUu2', 'HUo2', 'HUp2', 'CZj4', 'CZu4', 'CZo4', 'CZp4', 'SKj2', 'SKu2', 'SKo2', 'SKp2', 'ROj2', 'ROu2', 'ROp2', 'CHj3', 'CHu3', 'CHo3', 'CHp3', 'ATj1', 'ATu1', 'ATo1', 'ATp1', 'CZj3', 'CZu2', 'CZp2', 'CHj4', 'CHu4', 'CHo4', 'CHp4']
+asap_env_list=['DEV1', 'DEd1', 'DEj1', 'DEu1', 'DEp3', 'DEj4', 'DEu4', 'DEp4', 'NLj4', 'NLu4', 'NLo4', 'NLp4', 'PLj3', 'PLu3', 'PLo3', 'PLp3', 'HUj2', 'HUu2', 'HUo2', 'HUp2', 'CZj4', 'CZu4', 'CZo4', 'CZp4', 'SKj2', 'SKu2', 'SKo2', 'SKp2', 'ROj2', 'ROu2', 'ROp2', 'CHj3', 'CHu3', 'CHo3', 'CHp3', 'ATj1', 'ATu1', 'ATo1', 'ATp1', 'CZj3', 'CZu2', 'CZp2', 'CHj4', 'CHu4', 'CHo4', 'CHp4','ATj4', 'ATu4', 'ATo4', 'ATp4','ROj1', 'ROu1', 'ROp1','IEj3','IEu3','IEo3','IEp3']
 
 def update_mongo(selected_environment):
     con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
@@ -32,20 +32,24 @@ def update_mongo(selected_environment):
     env_db_details=db_details[selected_environment]
     tables=[]
     table_data_dict={}
+    print "in update_mongo_function"
     for table_name in table_names['SARM']:
+        print table_name
         engine=create_engine('oracle://'+env_db_details['sarm_user']+':'+env_db_details['sarm_user']+'@'+env_db_details['dbname'])
         try:
+            print table_name
             current_to_backup_diff=pd.read_sql('select * from '+table_name+' MINUS select * from '+table_name+'_BKP',engine)
             backup_to_current_diff=pd.read_sql('select * from '+table_name+'_BKP MINUS select * from '+table_name,engine)
             if not backup_to_current_diff.empty:
                 table_data_dict[table_name]=current_to_backup_diff.to_dict('records')
                 table_data_dict[table_name+'_BKP']=backup_to_current_diff.to_dict('records')
                 tables.append(table_name)
-        except sqlalchemy.exc.DatabaseError:
-            pass
+        except Exception as e:
+            print e
     for table_name in table_names['CTRL']:
         engine=create_engine('oracle://'+env_db_details['ctrl_user']+':'+env_db_details['ctrl_user']+'@'+env_db_details['dbname'])
         try:
+            print table_name
             current_to_backup_diff=pd.read_sql('select * from '+table_name+' MINUS select * from '+table_name+'_BKP',engine)
             backup_to_current_diff=pd.read_sql('select * from '+table_name+'_BKP MINUS select * from '+table_name,engine)
             if not backup_to_current_diff.empty:
@@ -55,6 +59,7 @@ def update_mongo(selected_environment):
         except sqlalchemy.exc.DatabaseError:
             pass
     table_data_dict['table_names']=tables
+    print tables
     json_data=json.dumps(table_data_dict,default=json_util.default)
     fp=open('./p_data.json','w')
     fp.write(json_data)
@@ -94,19 +99,11 @@ app.layout = html.Div([
     html.Br(),
     html.Br(),
     html.Br(),
-    html.Div(id="new_layout"),
+    html.Div(id="display_content",style={'display':'inline-block','float':'left','padding-left':'50px'}),
+                html.Div(id="selected_content_display",style={'display':'inline-block','float':'right','padding-right':'350px'}),
     html.Br(),
     html.Br()
     ])
-table_layout=html.Div([
-                html.Div(id="display_content",style={'display':'inline-block','float':'left'},children=[html.Div("Please wait while the page is loading...",style={'padding-left':'550px','color':'#CD7F32','textAlign':'center','fontSize':20})]),
-                html.Div(id="selected_content_display",style={'display':'inline-block','float':'right','padding-right':'350px'}),
-            ])
-
-@app.callback(Output("new_layout", "children"), [Input("environments-dropdown", "value")])
-def load_new_layout(env):
-    if env is not None:
-        return table_layout
 
 @app.callback(Output("display_content", "children"), [Input("environments-dropdown", "value")])
 def display_modified_table_names(selected_environment):
@@ -251,4 +248,4 @@ def display_on_click(selected_row_indices,rows,selected_environment,selected_tab
         return html.B('Inserted "{}" row(s) to table "{}"' .format(len(selected_row_indices),table_names_list[selected_table_name_index[0]].values()[0]), style={'fontSize':20,'color':'#32CD32'})
 
 if __name__ == '__main__':
-    server.run(debug=True, port=3005)
+    server.run(debug=True)

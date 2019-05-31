@@ -1,6 +1,6 @@
 #!/usr/local/bin/python2.7
 import dash
-from dash.dependencies import Input, Output, State, Event
+from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 from app import app, server
@@ -21,7 +21,7 @@ import json
 
 load_dotenv(dotenv_path='/config/asap.env')
 
-asap_env_list=['DEV1', 'DEd1', 'DEj1', 'DEu1', 'DEp3', 'DEj4', 'DEu4', 'DEp4', 'NLj4', 'NLu4', 'NLo4', 'NLp4', 'PLj3', 'PLu3', 'PLo3', 'PLp3', 'HUj2', 'HUu2', 'HUo2', 'HUp2', 'CZj4', 'CZu4', 'CZo4', 'CZp4', 'SKj2', 'SKu2', 'SKo2', 'SKp2', 'ROj2', 'ROu2', 'ROp2', 'CHj3', 'CHu3', 'CHo3', 'CHp3', 'ATj1', 'ATu1', 'ATo1', 'ATp1', 'CZj3', 'CZu2', 'CZp2', 'CHj4', 'CHu4', 'CHo4', 'CHp4','ATj4', 'ATu4', 'ATo4', 'ATp4','ROj1', 'ROu1', 'ROp1','IEj3','IEu3','IEo3','IEp3']
+asap_env_list=['DEV1', 'DEd1', 'DEj1', 'DEu1', 'DEp3', 'DEj4', 'DEu4', 'DEp4', 'NLj4', 'NLu4', 'NLo4', 'NLp4', 'PLj3', 'PLu3', 'PLo3', 'PLp3', 'HUj2', 'HUu2', 'HUo2', 'HUp2', 'CZj4', 'CZu4', 'CZo4', 'CZp4', 'SKj2', 'SKu2', 'SKo2', 'SKp2', 'ROj2', 'ROu2', 'ROp2', 'CHj3', 'CHu3', 'CHo3', 'CHp3', 'ATj1', 'ATu1', 'ATo1', 'ATp1', 'CZj3', 'CZu2', 'CZp2', 'CHj4', 'CHu4', 'CHo4', 'CHp4', 'ATu4', 'ATo4', 'ATp4','ROj1', 'ROu1', 'ROp1','IEj3','IEu3','IEo3','IEp3']
 
 def update_mongo(selected_environment):
     con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
@@ -56,8 +56,8 @@ def update_mongo(selected_environment):
                 table_data_dict[table_name]=current_to_backup_diff.to_dict('records')
                 table_data_dict[table_name+'_BKP']=backup_to_current_diff.to_dict('records')
                 tables.append(table_name)
-        except sqlalchemy.exc.DatabaseError:
-            pass
+        except Exception as e:
+            print e
     table_data_dict['table_names']=tables
     print tables
     json_data=json.dumps(table_data_dict,default=json_util.default)
@@ -76,37 +76,80 @@ def update_mongo(selected_environment):
 
 app.layout = html.Div([
     #Including local stylesheet
-    html.Link(href='/static/layout_style.css', rel='stylesheet'),
-    html.H1(children='ASAP SQL TABLE REVISION',id ='sql', style={'fontSize':32,'textAlign': 'center','color': '#008080','display': 'inline-block','padding-top':'20px'}),
-    html.Img(
+    html.Link(href='/static/cdc_layout_style.css', rel='stylesheet'),
+    html.Div([
+        html.Img(
+        src='/img/Accenture-logo-red.png',
+        style={
+            'height' : '100%',
+            'width' : '12%',
+            'display':'inline-block',
+            'float':'left',
+            'padding-right':'20px'
+        }
+       ),
+        html.Div([
+             html.H1(children='ASAP SQL TABLE REVISION',style={'textAlign': 'center','color': '#000000'})
+           ],style={'padding-left':'240px','display':'inline-block','float':'left'}),
+    #html.Br(),
+        html.Img(
         src='/img/logo-client-liberty-color.jpg',
         style={
-            'height' : '15%',
-            'width' : '15%',
-            'float' : 'right',
-            'display': 'inline-block'
-           },
-       ),
+            'height' : '80%',
+            'width' : '11%',
+            'display':'inline-block',
+            'float':'right',
+            'padding-right':'20px'
+        }
+       )],className='head-conatiner'),
+    html.Div([
     html.Br(),
     html.Br(),
     html.Br(),
     html.Br(),
-    html.Div([dcc.Dropdown(id='environments-dropdown',
-                          options=[{'label': k, 'value': k} for k in asap_env_list],
-                          style={'color': '#8B0000'},
-                          clearable=False)],
-             style={'padding-left': '570px','color':'#483D8B','width':'250px'}),
+    html.Table(
+        # Header
+        children=[
+            html.Thead(
+                html.Tr([
+                    html.Th(html.Div([
+                                     html.B(html.Div('Environment : ', className='env_name',style={'color':'#597E16','fontSize': 20,'display':'inline-block','float':'left','padding-right':'10px'})),
+         ]), style={'padding-top':'10px', 'padding-bottom':'10px','color':'#1A5276'}),
+                    html.Th(html.Div([
+                                     html.Div(dcc.Dropdown(id='environments-dropdown',
+                                                           options=[{'label': k, 'value': k} for k in asap_env_list],
+                                                           placeholder='Select the environment'),
+                                               style={'display':'inline-block','float':'right','width':'200px'})
+         ]), style={'padding-top':'10px', 'padding-bottom':'10px','padding-right': '100px','color':'#1A5276'})
+                    ])
+                ),
+        ],style={
+                'margin-left': 'auto',
+                'margin-right': 'auto',
+                'padding-left': '50px',
+                'padding-right': '50px',
+                'textAlign': 'left',
+                }),
     html.Br(),
     html.Br(),
     html.Br(),
-    html.Div(id="display_content",style={'display':'inline-block','float':'left','padding-left':'50px'}),
-                html.Div(id="selected_content_display",style={'display':'inline-block','float':'right','padding-right':'350px'}),
+    html.Div(id="new_layout"),
     html.Br(),
     html.Br()
-    ])
+    ],className='main-container')])
 
-@app.callback(Output("display_content", "children"), [Input("environments-dropdown", "value")])
-def display_modified_table_names(selected_environment):
+table_layout=html.Div([
+                html.Div(id="display_content",style={'display':'inline-block','float':'left'},children=[html.Div("Please wait while the page is loading...",id="temp_id",style={'padding-left':'550px','color':'#CD7F32','textAlign':'center','fontSize':20})]),
+                html.Div(id="selected_content_display",style={'display':'inline-block','float':'right','padding-right':'350px'}),
+            ])
+
+@app.callback(Output("new_layout", "children"), [Input("environments-dropdown", "value")])
+def load_new_layout(env):
+    if env is not None:
+        return table_layout
+
+@app.callback(Output("display_content", "children"),[Input("temp_id","children")], [State("environments-dropdown", "value")])
+def display_modified_table_names(temp_id,selected_environment):
     update_mongo(selected_environment)
     con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
     db=con['libertyglobal-oss-asap']
@@ -208,16 +251,18 @@ def display_table_difference(selected_row_indices,rows,selected_environment):
 def display_insert_button(rows,selected_row_indices):
     if len(selected_row_indices)>0:
         return html.Button(id='insert',
-                           n_clicks=0, children = 'Insert',
+                           children = 'Insert',
                            style={'color':'#597E16','width':'85px',})
 
 @app.callback(
     Output('intermediate_result','children'),
-    [],
-    [State('table_bkp','selected_rows'),State('table_bkp', 'data'),State('environments-dropdown', 'value'),State('table', 'selected_rows'),State('table','data')],
-    [Event('insert','click')])
-def display_on_click(selected_row_indices,rows,selected_environment,selected_table_name_index,table_names_list):
+    [Input('insert','n_clicks')],
+    [State('table_bkp','selected_rows'),State('table_bkp', 'data'),State('environments-dropdown', 'value'),State('table', 'selected_rows'),State('table','data')])
+def display_on_click(n_clicks,selected_row_indices,rows,selected_environment,selected_table_name_index,table_names_list):
     if len(selected_row_indices)>0:
+        con=MongoClient("mongodb://"+os.environ['asap_user']+":"+os.environ['asap_pwd']+"@mongodb:27017/libertyglobal-oss-asap?ssl=false")
+        db=con['libertyglobal-oss-asap']
+        coll=db['Environment']
         table_names=coll.find_one({'_id':selected_environment[:2].upper()})
         db_details=coll.find_one({'_id':'DB'})
         env_db_details=db_details[selected_environment]
@@ -249,3 +294,4 @@ def display_on_click(selected_row_indices,rows,selected_environment,selected_tab
 
 if __name__ == '__main__':
     server.run(debug=True)
+

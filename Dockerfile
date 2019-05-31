@@ -1,6 +1,8 @@
 FROM lgdop/centos6:python2.7.14
 
-# Java Env Variables
+ENV https_proxy=http://172.23.29.155:3128
+ENV http_proxy=http://172.23.29.155:3128
+
 ENV JAVA_VERSION=1.8.0
 ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.191.b12-1.el7_6.x86_64/jre
 
@@ -11,9 +13,9 @@ RUN yum update -y && yum -y install epel-release \
 
 RUN virtualenv my27project && source my27project/bin/activate && python --version
 
-RUN pip2.7 install dash==0.35.1 \
-                dash-html-components==0.13.4 \
-                dash-core-components==0.42.1 \
+RUN pip2.7 install dash \
+                dash-html-components \
+                dash-core-components \
                 datetime \
                 pymongo \
                 flask \
@@ -21,9 +23,9 @@ RUN pip2.7 install dash==0.35.1 \
                 python-dotenv \
                 cx_Oracle \
                 SQLAlchemy \
-                dash-table==3.1.11 \
+                dash-table \
                 pandas \
-                dash-auth==1.2.0
+                dash-auth
 WORKDIR /sql_difference
 
 COPY . .
@@ -39,4 +41,4 @@ ENV ORACLE_HOME=/usr/lib/oracle/12.2
 
 EXPOSE 3050
 
-CMD [ "gunicorn", "--bind", "0.0.0.0:3050","-w","5", "asap_sql_dashboard:server" ]
+CMD [ "gunicorn", "--bind", "0.0.0.0:3050","-w","5","--timeout","1200", "asap_sql_dashboard:server" ]
